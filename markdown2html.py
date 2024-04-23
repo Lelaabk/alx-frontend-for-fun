@@ -11,8 +11,10 @@ def markdown_to_html(input_f, output_f):
     html_text = markdown.markdown(md_text)
     with open(output_f, 'w') as f:
         f.write(html_text)
+    print("HTML file successfully created:", output_f)
 
 def main():
+    """Main function to parse command line args and convert Markdown to HTML"""
     if len(sys.argv) != 3:
         sys.stderr.write("Usage: ./markdown2html.py <input_file> <output_file>\n")
         sys.exit(1)
@@ -25,5 +27,5 @@ def main():
         markdown_to_html(input_f, output_f)
         sys.exit(0)
     
-    if __name__ == "__main__":
+if __name__ == "__main__":
     main()
