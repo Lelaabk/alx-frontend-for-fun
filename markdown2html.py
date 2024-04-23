@@ -24,3 +24,6 @@ def main():
 
         markdown_to_html(input_f, output_f)
         sys.exit(0)
+    
+    if __name__ == "__main__":
+    main()
