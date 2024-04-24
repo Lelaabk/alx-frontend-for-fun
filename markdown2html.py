@@ -48,8 +48,7 @@ def main():
     markdown_f = sys.argv[1]
     output_f = sys.argv[2]
 
-
-    _markdown_to_html(markdown_f, output_f)
+    markdown_to_html(markdown_f, output_f)
     sys.exit(0)
 
 
