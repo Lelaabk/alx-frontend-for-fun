@@ -19,13 +19,16 @@ def markdown_to_html(markdown_f, output_f):
         line = line.strip()
         line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)
         line = re.sub(r'__(.*?)__', r'<em>\1</em>', line)
-        line = re.sub(r'\[\[(.*?)\]\]', lambda x: hashlib.md5(x.group(1).encode()).hexdigest(), line)
-        line = re.sub(r'\(\((.*?)\)\)', lambda x: x.group(1).replace('c', '').replace('C', ''), line)
+        line = re.sub(r'\[\[(.*?)\]\]', lambda x:
+                      hashlib.md5(x.group(1).encode()).hexdigest(), line)
+        line = re.sub(r'\(\((.*?)\)\)', lambda x:
+                      x.group(1).replace('c', '').replace('C', ''), line)
 
         if line.startswith('#'):
             heading_lvl = min(6, line.count('#'))
             heading_txt = line.strip('#').strip()
-            html_lines.append(f"<h{heading_lvl}>{heading_txt}</h{heading_lvl}>")
+            html_lines
+            .append(f"<h{heading_lvl}>{heading_txt}</h{heading_lvl}>")
 
         elif line.startswith('-'):
             html_lines.append("<ul>")
@@ -37,6 +40,7 @@ def markdown_to_html(markdown_f, output_f):
 
     with open(output_f, 'w') as f:
         f.write('\n'.join(html_lines))
+
 
 def main():
     """Main function to parse command line args and convert Markdown to HTML"""
