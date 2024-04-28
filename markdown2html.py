@@ -2,55 +2,149 @@
 import sys
 import os
 import re
-import hashlib
 
 
-def markdown_to_html(markdown_f, output_f):
-    """Convert Markdown file to HTML file."""
-    if not os.path.exists(markdown_f):
-        print(f"Missing {markdown_f}", file=sys.stderr)
-        sys.exit(1)
+# This check for command line args
+if len(sys.argv) == 1:
+    sys.exit(1)
 
-    with open(markdown_f, "r") as f:
-        lines = f.readlines()
+# This check if input file exists
+if not os.path.isfile(sys.argv[1]):
+    sys.exit(2)
 
-    html_lines = []
-    for line in lines:
-        line = line.strip()
-        line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)
-        line = re.sub(r'__(.*?)__', r'<em>\1</em>', line)
-        line = re.sub(r'\[\[(.*?)\]\]', lambda x: hashlib.md5(x.group(1).encode()).hexdigest(), line)
-        line = re.sub(r'\(\((.*?)\)\)', lambda x: x.group(1).replace('c', '').replace('C', ''), line)
+# Inpit and output file names
+inputf = sys.argv[1]
+outputf = re.sub('\.(md|markdown)', '', inputf)+'.html'
 
-        if line.startswith('#'):
-            heading_lvl = min(6, line.count('#'))
-            heading_txt = line.strip('#').strip()
-            html_lines.append(f"<h{heading_lvl}>{heading_txt}</h{heading_lvl}>")
+inputf = open(inputf, 'r') ; ifile_str = inputf.read() + '\n'
+outputf = open(outputf, 'w') ; ofile_str = ''
 
-        elif line.startswith('-'):
-            html_lines.append("<ul>")
-            html_lines.append(f"<li>{line.strip('-').strip()}</li>")
-            html_lines.append("</ul>")
+# Initialize boolean flags & counters
+B = False # bold
+I = False # italic
+S = False # strikethrough
+c = 0     # code
+C = False # Code block
+Q = 0     # Block quote
+p = False # Paragraph 
+i = 0 
 
-        elif line:
-            html_lines.append(f"<p>{line}</p>")
+# Loop through the string
+while i < len(ifile_str)-2:
+    str = ifile_str[i]
+    i += 1
 
-    with open(output_f, 'w') as f:
-        f.write('\n'.join(html_lines))
+    # Open paragraph tag if not open
+    if str != '\n' and not pr:
+        outputf.write('<p>')
+        pr = True
 
-def main():
-    """Main function to parse command line args and convert Markdown to HTML"""
-    if len(sys.argv) < 3:
-        print("Usage: ./markdown2html.py <input_file> <output_file>",
-              file=sys.stderr)
-        sys.exit(1)
+    # Handle bold & italic syntax
+    if str in ('*', '_'):
+        if C:
+            outputf.write(str)
+            continue
+        if ifile_str[i] in ('*', '_'):
+            outputf.write(f'<{"/"*B}b>')
+            B = not B
+            i += 1
+        else:
+            outputf.write(f'<{"/"*I}i>')
+            I = not I
 
-    markdown_f = sys.argv[1]
-    output_f = sys.argv[2]
+    # Handle code syntax
+    elif str == '`':
+        str_b, str_c = ifile_str[i], ifile_str[i+1]
+        if str == str_b == str_c:
+            outputf.write(f'<{"/"*C}code>')
+            C = not C
+            i += 2
+        else:
+            if C:
+                outputf.write(str)
+                continue
+            outputf.write(f'<{"/"*c}code>')
+            c = not c
 
-    markdown_to_html(markdown_f, output_f)
-    sys.exit(0)
+   # Handle strike syntax 
+    elif str == '~':
+        if C:
+            outputf.write(str)
+            continue
+        if ifile_str[i] == '~':
+            outputf.write(f'<{"/"*S}del>')
+            S = not S
+            i += 1
 
+    # Handle horizontal rule syntax
+    elif str in ('-', '*', '_'):
+        str_b , str_c = ifile_str[i], ifile_str[i+1]
+        if ((i > 1 and ifile_str[i-2] == '\n') or i == 1) and ifile_str[i+2] == '\n':
+            if str == str_b == str_c:
+                if B:
+                    outputf.write(f'</b>')
+                    B = False
+                if I:
+                    outputf.write(f'</i>')
+                    I = False
+                if S:
+                    outputf.write(f'</del>')
+                    S = False
+                outputf.write('<hr>')
 
-if __name__ == "__main__":
-    main()
+    # Handle line syntax
+    elif str == '[':
+        if re.match('^\[.*\]\(.*(".*"|)\)$', ifile_str[i-1:].split(')',1)[0]+')'):
+            name = ''
+            link = ''
+            alt = ''
+            s = ifile_str[i:].split(')',1)[0]+')'
+            i += len(s)
+            name = s.split(']')[0]
+            link = s.split('(')[1].split(')')[0]
+            if '"' in link:
+                alt = link.split('"')[1].split('"')[0]
+                link = link.split('"')[0].strip()
+            outputf.write(f'<a href="{link} title="{alt}">{name}</a>')
+
+    # Handle new line
+    elif str == '\n':
+        if C:
+            outputf.write(str)
+            continue
+
+        if c:
+            outputf.write(f'</code>')
+
+        if not p:
+            outputf.write('<br>')
+        elif ifile_str[i] == '\n':
+            outputf.write('</p>\n')
+            p = False
+            i += 1
+
+            if B:
+                outputf.write(f'</b>')
+                B = False
+            if I:
+                outputf.write(f'</i>')
+                I = False
+            if S:
+                outputf.write(f'</del>')
+                S = False
+        elif not ifile_str[i]:
+            if p:
+                outputf.write('</p>\n')
+            else:
+                outputf.write('\n')
+        else:
+            outputf.write('<br>')
+
+        outputf.write('\n')
+
+    else:
+        outputf.write(str)
+
+# Close input & output files
+inputf.close()
+outputf.close()
