@@ -1,159 +1,63 @@
 #!/usr/bin/python3
 """
-Converts Markdown files to Html format.
+This is a script to convert a Markdown file to HTML.
+
 Usage:
-    ./markdown2html.py <input_file> <output_file>
+    ./markdown2html.py [inputf] [outputf]
+
+Arguments:
+    inputf: the name of the Markdown file to be converted
+    outputf: the name of the output HTML file
+
+Example:
+    ./markdown2html.py README.md README.html
 """
-import sys
-import os
+
+import argparse
+import pathlib
 import re
+import sys
 
 
-# This check for command line args
-if len(sys.argv) == 1:
-    sys.exit(1)
+def md_to_html(inputf, outputf):
+    '''
+    Converts markdown file to HTML file
+    '''
+    # Read the contents of the input file
+    with open(inputf, encoding='utf-8') as f:
+        markd_text = f.readlines()
 
-# This check if input file exists
-if not os.path.isfile(sys.argv[1]):
-    sys.exit(2)
-
-# Inpit and output file names
-inputf = sys.argv[1]
-outputf = re.sub(r'\.(md|markdown)$', '', inputf)+'.html'
-
-inputf = open(inputf, 'r')
-ifile_str = inputf.read() + '\n'
-outputf = open(outputf, 'w')
-ofile_str = ''
-
-# Initialize boolean flags & counters
-B = False  # bold
-It = False  # italic
-S = False  # strikethrough
-c = 0      # code
-C = False  # Code block
-Q = 0      # Block quote
-p = False  # Paragraph
-i = 0
-
-# Loop through the string
-while i < len(ifile_str)-2:
-    str = ifile_str[i]
-    i += 1
-
-    # Open paragraph tag if not open
-    if str != '\n' and not p:
-        outputf.write('<p>')
-        p = True
-
-    # Handle bold & italic syntax
-    if str in ('*', '_'):
-        if C:
-            outputf.write(str)
-            continue
-        if ifile_str[i] in ('*', '_'):
-            outputf.write(f'<{"/"*B}b>')
-            B = not B
-            i += 1
+    html_content = []
+    for line in markd_text:
+        # Check if the line is a heading
+        match = re.match(r'(#){1,6} (.*)', line)
+        if match:
+            # Get the level of the heading
+            h_level = len(match.group(1))
+            # Get the content of the heading
+            h_content = match.group(2)
+            # Append the HTML equivalent of the heading
+            html_content.append(f'<h{h_level}>{h_content}</h{h_level}>\n')
         else:
-            outputf.write(f'<{"/"*It}i>')
-            It = not It
+            html_content.append(line)
 
-    # Handle code syntax
-    elif str == '`':
-        str_b, str_c = ifile_str[i], ifile_str[i+1]
-        if str == str_b == str_c:
-            outputf.write(f'<{"/"*C}code>')
-            C = not C
-            i += 2
-        else:
-            if C:
-                outputf.write(str)
-                continue
-            outputf.write(f'<{"/"*c}code>')
-            c = not c
+    # Write the HTML content to the output file
+    with open(outputf, 'w', encoding='utf-8') as f:
+        f.writelines(html_content)
 
-    # Handle strike syntax
-    elif str == '~':
-        if C:
-            outputf.write(str)
-            continue
-        if ifile_str[i] == '~':
-            outputf.write(f'<{"/"*S}del>')
-            S = not S
-            i += 1
 
-    # Handle horizontal rule syntax
-    elif str in ('-', '*', '_'):
-        str_b, str_c = ifile_str[i], ifile_str[i+1]
-        if ((i > 1 and ifile_str[i-2] == '\n') or
-           i == 1) and ifile_str[i+2] == '\n':
-            if str == str_b == str_c:
-                if B:
-                    outputf.write(f'</b>')
-                    B = False
-                if It:
-                    outputf.write(f'</i>')
-                    It = False
-                if S:
-                    outputf.write(f'</del>')
-                    S = False
-                outputf.write('<hr>')
+if __name__ == '__main__':
+    # Parse command-line arguments
+    prs = argparse.ArgumentParser(description='Convert markdown to HTML')
+    prs.add_argument('inputf', help='path to input markdown file')
+    prs.add_argument('outputf', help='path to output HTML file')
+    args = prs.parse_args()
 
-    # Handle line syntax
-    elif str == '[':
-        if re.match(r'^\[.*\]\(.*(".*"|)\)$',
-                    ifile_str[i-1:].split(')', 1)[0]+')'):
-            name = ''
-            link = ''
-            alt = ''
-            s = ifile_str[i:].split(')', 1)[0]+')'
-            i += len(s)
-            name = s.split(']')[0]
-            link = s.split('(')[1].split(')')[0]
-            if '"' in link:
-                alt = link.split('"')[1].split('"')[0]
-                link = link.split('"')[0].strip()
-            outputf.write(f'<a href="{link} title="{alt}">{name}</a>')
+    # Check if the input file exists
+    input_path = pathlib.Path(args.inputf)
+    if not input_path.is_file():
+        print(f'Missing {input_path}', file=sys.stderr)
+        sys.exit(1)
 
-    # Handle new line
-    elif str == '\n':
-        if C:
-            outputf.write(str)
-            continue
-
-        if c:
-            outputf.write(f'</code>')
-
-        if not p:
-            outputf.write('<br>')
-        elif ifile_str[i] == '\n':
-            outputf.write('</p>\n')
-            p = False
-            i += 1
-
-            if B:
-                outputf.write(f'</b>')
-                B = False
-            if It:
-                outputf.write(f'</i>')
-                It = False
-            if S:
-                outputf.write(f'</del>')
-                S = False
-        elif not ifile_str[i]:
-            if p:
-                outputf.write('</p>\n')
-            else:
-                outputf.write('\n')
-        else:
-            outputf.write('<br>')
-
-        outputf.write('\n')
-
-    else:
-        outputf.write(str)
-
-# Close input & output files
-inputf.close()
-outputf.close()
+    # Convert the markdown file to HTML
+    md_to_html(args.inputf, args.outputf)
