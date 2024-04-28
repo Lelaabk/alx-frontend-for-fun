@@ -16,9 +16,9 @@ if not os.path.isfile(sys.argv[1]):
 inputf = sys.argv[1]
 outputf = re.sub(r'\.(md|markdown)$', '', inputf)+'.html'
 
-inputf = open(inputf, 'r') 
+inputf = open(inputf, 'r')
 ifile_str = inputf.read() + '\n'
-outputf = open(outputf, 'w') 
+outputf = open(outputf, 'w')
 ofile_str = ''
 
 # Initialize boolean flags & counters
@@ -28,7 +28,7 @@ S = False  # strikethrough
 c = 0      # code
 C = False  # Code block
 Q = 0      # Block quote
-p = False  # Paragraph 
+p = False  # Paragraph
 i = 0
 
 # Loop through the string
@@ -68,7 +68,7 @@ while i < len(ifile_str)-2:
             outputf.write(f'<{"/"*c}code>')
             c = not c
 
-   # Handle strike syntax 
+    # Handle strike syntax
     elif str == '~':
         if C:
             outputf.write(str)
@@ -80,8 +80,9 @@ while i < len(ifile_str)-2:
 
     # Handle horizontal rule syntax
     elif str in ('-', '*', '_'):
-        str_b , str_c = ifile_str[i], ifile_str[i+1]
-        if ((i > 1 and ifile_str[i-2] == '\n') or i == 1) and ifile_str[i+2] == '\n':
+        str_b, str_c = ifile_str[i], ifile_str[i+1]
+        if ((i > 1 and ifile_str[i-2] == '\n') or
+            i == 1) and ifile_str[i+2] == '\n':
             if str == str_b == str_c:
                 if B:
                     outputf.write(f'</b>')
@@ -96,11 +97,11 @@ while i < len(ifile_str)-2:
 
     # Handle line syntax
     elif str == '[':
-        if re.match('^\[.*\]\(.*(".*"|)\)$', ifile_str[i-1:].split(')',1)[0]+')'):
+        if re.match(r'^\[.*\]\(.*(".*"|)\)$', ifile_str[i-1:].split(')',1)[0]+')'):
             name = ''
             link = ''
             alt = ''
-            s = ifile_str[i:].split(')',1)[0]+')'
+            s = ifile_str[i:].split(')', 1)[0]+')'
             i += len(s)
             name = s.split(']')[0]
             link = s.split('(')[1].split(')')[0]
