@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+"""
+Converts Markdown files to Html format.
+Usage:
+    ./markdown2html.py <input_file> <output_file>
+"""
 import sys
 import os
 import re
