@@ -23,7 +23,7 @@ ofile_str = ''
 
 # Initialize boolean flags & counters
 B = False  # bold
-I = False  # italic
+It = False  # italic
 S = False  # strikethrough
 c = 0      # code
 C = False  # Code block
@@ -51,8 +51,8 @@ while i < len(ifile_str)-2:
             B = not B
             i += 1
         else:
-            outputf.write(f'<{"/"*I}i>')
-            I = not I
+            outputf.write(f'<{"/"*It}i>')
+            It = not It
 
     # Handle code syntax
     elif str == '`':
@@ -82,14 +82,14 @@ while i < len(ifile_str)-2:
     elif str in ('-', '*', '_'):
         str_b, str_c = ifile_str[i], ifile_str[i+1]
         if ((i > 1 and ifile_str[i-2] == '\n') or
-            i == 1) and ifile_str[i+2] == '\n':
+           i == 1) and ifile_str[i+2] == '\n':
             if str == str_b == str_c:
                 if B:
                     outputf.write(f'</b>')
                     B = False
-                if I:
+                if It:
                     outputf.write(f'</i>')
-                    I = False
+                    It = False
                 if S:
                     outputf.write(f'</del>')
                     S = False
@@ -97,7 +97,8 @@ while i < len(ifile_str)-2:
 
     # Handle line syntax
     elif str == '[':
-        if re.match(r'^\[.*\]\(.*(".*"|)\)$', ifile_str[i-1:].split(')',1)[0]+')'):
+        if re.match(r'^\[.*\]\(.*(".*"|)\)$',
+                    ifile_str[i-1:].split(')', 1)[0]+')'):
             name = ''
             link = ''
             alt = ''
@@ -129,9 +130,9 @@ while i < len(ifile_str)-2:
             if B:
                 outputf.write(f'</b>')
                 B = False
-            if I:
+            if It:
                 outputf.write(f'</i>')
-                I = False
+                It = False
             if S:
                 outputf.write(f'</del>')
                 S = False
