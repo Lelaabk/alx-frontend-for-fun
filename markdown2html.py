@@ -14,20 +14,22 @@ if not os.path.isfile(sys.argv[1]):
 
 # Inpit and output file names
 inputf = sys.argv[1]
-outputf = re.sub('\.(md|markdown)', '', inputf)+'.html'
+outputf = re.sub(r'\.(md|markdown)$', '', inputf)+'.html'
 
-inputf = open(inputf, 'r') ; ifile_str = inputf.read() + '\n'
-outputf = open(outputf, 'w') ; ofile_str = ''
+inputf = open(inputf, 'r') 
+ifile_str = inputf.read() + '\n'
+outputf = open(outputf, 'w') 
+ofile_str = ''
 
 # Initialize boolean flags & counters
-B = False # bold
-I = False # italic
-S = False # strikethrough
-c = 0     # code
-C = False # Code block
-Q = 0     # Block quote
-p = False # Paragraph 
-i = 0 
+B = False  # bold
+I = False  # italic
+S = False  # strikethrough
+c = 0      # code
+C = False  # Code block
+Q = 0      # Block quote
+p = False  # Paragraph 
+i = 0
 
 # Loop through the string
 while i < len(ifile_str)-2:
