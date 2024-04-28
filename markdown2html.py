@@ -42,9 +42,9 @@ while i < len(ifile_str)-2:
     i += 1
 
     # Open paragraph tag if not open
-    if str != '\n' and not pr:
+    if str != '\n' and not p:
         outputf.write('<p>')
-        pr = True
+        p = True
 
     # Handle bold & italic syntax
     if str in ('*', '_'):
