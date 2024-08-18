@@ -1,5 +1,20 @@
 /* Prints the sorted list in the debug output. */
 @import '103-sort_list';
 
-$list_sorted: sort($list_to_sort);
+@function sort-list($list) {
+  $length: length($list);
+  @for $i from 1 through $length - 1 {
+    @for $j from 1 through $length - $i {
+      $current: nth($list, $j);
+      $next: nth($list, $j + 1);
+      @if str-slice($current, 1) > str-slice($next, 1) {
+        $list: set-nth($list, $j, $next);
+        $list: set-nth($list, $j + 1, $current);
+      }
+    }
+  }
+  @return $list;
+}
+
+$list_sorted: sort-list($list_to_sort);
 @debug $list_sorted;
