@@ -1,9 +1,8 @@
 /* Nested hover in Sass. */
-$text_color: #ff0000;
-$text_hover: #00ff00;
 button {
-  color: $text_color;
+  color: #FF0000; // Text color for button tags
+
   &:hover {
-    color: $text_hover;
+    color: #00FF00; // Text color when hovering over button tags
   }
 }
