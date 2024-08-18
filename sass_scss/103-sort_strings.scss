@@ -3,16 +3,19 @@
 
 @function sort-list($list) {
   $length: length($list);
+  
   @for $i from 1 through $length - 1 {
     @for $j from 1 through $length - $i {
       $current: nth($list, $j);
       $next: nth($list, $j + 1);
-      @if unquote($current) > unquote($next) {
+      
+      @if unquote(to-lower-case($current)) > unquote(to-lower-case($next)) {
         $list: set-nth($list, $j, $next);
         $list: set-nth($list, $j + 1, $current);
       }
     }
   }
+
   @return $list;
 }
 
