@@ -7,7 +7,7 @@
     @for $j from 1 through $length - $i {
       $current: nth($list, $j);
       $next: nth($list, $j + 1);
-      @if str-slice($current, 1) > str-slice($next, 1) {
+      @if unquote($current) > unquote($next) {
         $list: set-nth($list, $j, $next);
         $list: set-nth($list, $j + 1, $current);
       }
