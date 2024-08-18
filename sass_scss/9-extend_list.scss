@@ -1,0 +1,18 @@
+/* Extended in Sass. */
+%message_shared {
+    font-size: 12px;
+}
+
+.info {
+    @extend %message_shared;
+}
+
+.success {
+    @extend %message_shared;
+    color: #00ff00;
+}
+
+.warning {
+    @extend %message_shared;
+    color: #ff0000;
+}
